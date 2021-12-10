@@ -2,24 +2,26 @@
 -- TH utils for aeson.
 module DomainAeson.Util.AesonTH where
 
-import qualified Data.Aeson as Aeson
+import qualified Data.Aeson as Ae
+import qualified Data.Aeson.Key as AeKey
+import qualified Data.Aeson.KeyMap as AeKeyMap
 import qualified Data.Text as Text
 import DomainAeson.Prelude
-import DomainAeson.Util.GeneralTH
 import Language.Haskell.TH.Syntax
 import THLego.Helpers
 import qualified THLego.Lambdas as Lambdas
+import qualified TemplateHaskell.Compat.V0208 as Compat
 
 productParseJsonD :: Name -> [(Text, Bool)] -> Dec
 productParseJsonD conName fields =
-  FunD 'Aeson.parseJSON [clause]
+  FunD 'Ae.parseJSON [clause]
   where
     clause =
       Clause [] (NormalB exp) []
       where
         exp =
           multiAppE
-            (VarE 'Aeson.withObject)
+            (VarE 'Ae.withObject)
             [ LitE (StringL (nameString conName)),
               productObjectParsingLamE conName fields
             ]
@@ -37,5 +39,29 @@ productObjectParserE objectE conName fields =
       where
         opName =
           if required
-            then '(Aeson..:)
-            else '(Aeson..:?)
+            then '(Ae..:)
+            else '(Ae..:?)
+
+-- *
+
+productToJsonFunD :: Name -> [Text] -> Dec
+productToJsonFunD conName members =
+  FunD 'Ae.toJSON [clause]
+  where
+    clause =
+      Clause [Compat.conp conName memberPats] body []
+      where
+        memberPats = fmap memberPat members
+          where
+            memberPat member =
+              VarP (textName member)
+        body = NormalB $ AppE (ConE 'Ae.Object) mapE
+          where
+            mapE =
+              AppE (VarE 'AeKeyMap.fromList) (ListE (fmap memberPairE members))
+            memberPairE member =
+              appliedTupleE [memberKeyE member, memberJsonE member]
+            memberKeyE member =
+              AppE (VarE 'AeKey.fromString) (textLitE member)
+            memberJsonE member =
+              AppE (VarE 'Ae.toJSON) (VarE (textName member))
