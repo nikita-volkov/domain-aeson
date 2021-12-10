@@ -44,6 +44,27 @@ productObjectParserE objectE conName fields =
 
 -- *
 
+toJsonInstanceDec :: Type -> Dec -> Dec
+toJsonInstanceDec type_ toJsonFunDec =
+  InstanceD Nothing [] headType [toJsonFunDec]
+  where
+    headType =
+      AppT (ConT ''Ae.ToJSON) type_
+
+productToJsonInstanceDec :: Type -> Name -> [Text] -> Dec
+productToJsonInstanceDec type_ conName members =
+  toJsonInstanceDec type_ $ productToJsonFunD conName members
+
+sumToJsonInstanceDec :: Type -> [(Text, Name)] -> Dec
+sumToJsonInstanceDec type_ members =
+  toJsonInstanceDec type_ $ sumToJsonFunD members
+
+enumToJsonInstanceDec :: Type -> [(Text, Name)] -> Dec
+enumToJsonInstanceDec type_ members =
+  toJsonInstanceDec type_ $ enumToJsonFunD members
+
+-- *
+
 productToJsonFunD :: Name -> [Text] -> Dec
 productToJsonFunD conName members =
   FunD 'Ae.toJSON [clause]
