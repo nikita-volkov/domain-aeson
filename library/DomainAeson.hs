@@ -4,5 +4,6 @@ import qualified DomainAeson.InstanceDecs as InstanceDecs
 import DomainAeson.Prelude
 import qualified DomainCore.Deriver as Deriver
 
-aesonDeriver =
-  error "TODO"
+toJsonDeriver :: Deriver.Deriver
+toJsonDeriver =
+  Deriver.effectless InstanceDecs.toJson
