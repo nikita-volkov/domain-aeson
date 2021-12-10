@@ -84,7 +84,22 @@ sumToJsonFunD members =
                     ]
                 )
 
+enumToJsonFunD :: [(Text, Name)] -> Dec
+enumToJsonFunD members =
+  FunD 'Ae.toJSON clauses
+  where
+    clauses = fmap memberClause members
+      where
+        memberClause (jsonName, conName) =
+          Clause [Compat.conp conName []] (NormalB bodyExp) []
+          where
+            bodyExp = stringJsonE jsonName
+
 -- *
+
+stringJsonE :: Text -> Exp
+stringJsonE =
+  AppE (ConE 'Ae.String) . textLitE
 
 textKeyE :: Text -> Exp
 textKeyE text =
