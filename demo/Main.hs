@@ -12,6 +12,7 @@ import Domain
 import DomainAeson
 import Prelude
 
+main :: IO ()
 main =
   return ()
 

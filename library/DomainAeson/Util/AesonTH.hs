@@ -143,7 +143,7 @@ jsonArrayE exps =
 
 stringJsonE :: Text -> Exp
 stringJsonE =
-  AppE (ConE 'Ae.String) . textLitE
+  AppE (ConE 'Ae.String) . AppE (VarE 'fromString) . textLitE
 
 textKeyE :: Text -> Exp
 textKeyE text =
