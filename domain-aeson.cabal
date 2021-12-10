@@ -25,7 +25,6 @@ library
     DomainAeson.InstanceDecs
     DomainAeson.Prelude
     DomainAeson.Util.AesonTH
-    DomainAeson.Util.GeneralTH
   build-depends:
     aeson >=2 && <3,
     base >=4.12 && <5,
