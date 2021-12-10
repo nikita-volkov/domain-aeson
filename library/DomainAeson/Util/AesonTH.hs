@@ -6,6 +6,7 @@ import qualified Data.Aeson as Ae
 import qualified Data.Aeson.Key as AeKey
 import qualified Data.Aeson.KeyMap as AeKeyMap
 import qualified Data.Text as Text
+import qualified Data.Vector as Vector
 import DomainAeson.Prelude
 import Language.Haskell.TH.Syntax
 import THLego.Helpers
@@ -55,7 +56,7 @@ productToJsonInstanceDec :: Type -> Name -> [Text] -> Dec
 productToJsonInstanceDec type_ conName members =
   toJsonInstanceDec type_ $ productToJsonFunD conName members
 
-sumToJsonInstanceDec :: Type -> [(Text, Name)] -> Dec
+sumToJsonInstanceDec :: Type -> [(Text, Name, Int)] -> Dec
 sumToJsonInstanceDec type_ members =
   toJsonInstanceDec type_ $ sumToJsonFunD members
 
@@ -85,25 +86,44 @@ productToJsonFunD conName members =
             memberJsonE member =
               toJsonE (VarE (textName member))
 
-sumToJsonFunD :: [(Text, Name)] -> Dec
+sumToJsonFunD :: [(Text, Name, Int)] -> Dec
 sumToJsonFunD members =
   FunD 'Ae.toJSON clauses
   where
     clauses = fmap memberClause members
       where
-        memberClause (jsonName, conName) =
-          Clause [Compat.conp conName [VarP varName]] (NormalB bodyExp) []
-          where
-            varName = mkName "a"
-            bodyExp =
-              AppE
-                (ConE 'Ae.Object)
-                ( multiAppE
-                    (VarE 'AeKeyMap.singleton)
-                    [ textKeyE jsonName,
-                      toJsonE (VarE varName)
-                    ]
-                )
+        memberClause (jsonName, conName, components) =
+          case components of
+            0 ->
+              Clause [Compat.conp conName []] (NormalB bodyExp) []
+              where
+                bodyExp = stringJsonE jsonName
+            1 ->
+              Clause [Compat.conp conName [VarP varName]] (NormalB bodyExp) []
+              where
+                varName = mkName "a"
+                bodyExp =
+                  AppE
+                    (ConE 'Ae.Object)
+                    ( multiAppE
+                        (VarE 'AeKeyMap.singleton)
+                        [ textKeyE jsonName,
+                          toJsonE (VarE varName)
+                        ]
+                    )
+            _ ->
+              Clause [Compat.conp conName (fmap VarP varNames)] (NormalB bodyExp) []
+              where
+                varNames = enumAlphabeticNames components
+                bodyExp =
+                  AppE
+                    (ConE 'Ae.Object)
+                    ( multiAppE
+                        (VarE 'AeKeyMap.singleton)
+                        [ textKeyE jsonName,
+                          jsonArrayE (fmap (toJsonE . VarE) varNames)
+                        ]
+                    )
 
 enumToJsonFunD :: [(Text, Name)] -> Dec
 enumToJsonFunD members =
@@ -117,6 +137,10 @@ enumToJsonFunD members =
             bodyExp = stringJsonE jsonName
 
 -- *
+
+jsonArrayE :: [Exp] -> Exp
+jsonArrayE exps =
+  AppE (ConE 'Ae.Array) (AppE (VarE 'Vector.fromList) (ListE exps))
 
 stringJsonE :: Text -> Exp
 stringJsonE =
