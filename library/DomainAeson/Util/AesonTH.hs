@@ -1,17 +1,14 @@
-{-|
-TH utils for aeson.
--}
-module DomainAeson.Util.AesonTH
-where
+-- |
+-- TH utils for aeson.
+module DomainAeson.Util.AesonTH where
 
-import DomainAeson.Prelude
-import Language.Haskell.TH.Syntax
-import THLego.Helpers
-import DomainAeson.Util.GeneralTH
-import qualified THLego.Lambdas as Lambdas
 import qualified Data.Aeson as Aeson
 import qualified Data.Text as Text
-
+import DomainAeson.Prelude
+import DomainAeson.Util.GeneralTH
+import Language.Haskell.TH.Syntax
+import THLego.Helpers
+import qualified THLego.Lambdas as Lambdas
 
 productParseJsonD :: Name -> [(Text, Bool)] -> Dec
 productParseJsonD conName fields =
@@ -21,10 +18,10 @@ productParseJsonD conName fields =
       Clause [] (NormalB exp) []
       where
         exp =
-          multiAppE (VarE 'Aeson.withObject) [
-            LitE (StringL (nameString conName))
-            ,
-            productObjectParsingLamE conName fields
+          multiAppE
+            (VarE 'Aeson.withObject)
+            [ LitE (StringL (nameString conName)),
+              productObjectParsingLamE conName fields
             ]
 
 productObjectParsingLamE :: Name -> [(Text, Bool)] -> Exp

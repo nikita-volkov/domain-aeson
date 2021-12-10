@@ -1,4 +1,1 @@
-resolver: https://raw.githubusercontent.com/nikita-volkov/stack-snapshot/f792de0a149c5fa88fb8de99373e7737396c7bc3/snapshot.yaml
-extra-deps:
-- git: https://github.com/nikita-volkov/th-lego
-  commit: 9efda0610bcdbdaa5b862685ae7172cd89dddedc
+resolver: nightly-2021-11-19

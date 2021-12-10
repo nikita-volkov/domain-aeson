@@ -1,21 +1,23 @@
-{-# LANGUAGE
-  QuasiQuotes, TemplateHaskell,
-  FlexibleInstances, MultiParamTypeClasses,
-  DataKinds, TypeFamilies,
-  UndecidableInstances
-  #-}
-module Main
-where
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE UndecidableInstances #-}
 
-import Prelude
+module Main where
+
 import Domain
 import DomainAeson
-
+import Prelude
 
 main =
   return ()
 
-declare Nothing aesonDeriver
+declare
+  Nothing
+  aesonDeriver
   [schema|
 
     ServiceAddress:
