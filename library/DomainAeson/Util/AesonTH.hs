@@ -60,8 +60,36 @@ productToJsonFunD conName members =
             mapE =
               AppE (VarE 'AeKeyMap.fromList) (ListE (fmap memberPairE members))
             memberPairE member =
-              appliedTupleE [memberKeyE member, memberJsonE member]
-            memberKeyE member =
-              AppE (VarE 'AeKey.fromString) (textLitE member)
+              appliedTupleE [textKeyE member, memberJsonE member]
             memberJsonE member =
-              AppE (VarE 'Ae.toJSON) (VarE (textName member))
+              toJsonE (VarE (textName member))
+
+sumToJsonFunD :: [(Text, Name)] -> Dec
+sumToJsonFunD members =
+  FunD 'Ae.toJSON clauses
+  where
+    clauses = fmap memberClause members
+      where
+        memberClause (jsonName, conName) =
+          Clause [Compat.conp conName [VarP varName]] (NormalB bodyExp) []
+          where
+            varName = mkName "a"
+            bodyExp =
+              AppE
+                (ConE 'Ae.Object)
+                ( multiAppE
+                    (VarE 'AeKeyMap.singleton)
+                    [ textKeyE jsonName,
+                      toJsonE (VarE varName)
+                    ]
+                )
+
+-- *
+
+textKeyE :: Text -> Exp
+textKeyE text =
+  AppE (VarE 'AeKey.fromString) (textLitE text)
+
+toJsonE :: Exp -> Exp
+toJsonE =
+  AppE (VarE 'Ae.toJSON)
