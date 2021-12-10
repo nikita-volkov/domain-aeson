@@ -17,7 +17,7 @@ main =
 
 declare
   Nothing
-  aesonDeriver
+  toJsonDeriver
   [schema|
 
     ServiceAddress:
