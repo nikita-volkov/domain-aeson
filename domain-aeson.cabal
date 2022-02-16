@@ -7,7 +7,7 @@ homepage: https://github.com/nikita-volkov/domain-aeson
 bug-reports: https://github.com/nikita-volkov/domain-aeson/issues
 author: Nikita Volkov <nikita.y.volkov@mail.ru>
 maintainer: Nikita Volkov <nikita.y.volkov@mail.ru>
-copyright: (c) 2020 Nikita Volkov
+copyright: (c) 2022 Nikita Volkov
 license: MIT
 license-file: LICENSE
 build-type: Simple
