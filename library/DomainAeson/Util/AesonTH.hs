@@ -43,8 +43,6 @@ productObjectParserE objectE conName fields =
             then '(Ae..:)
             else '(Ae..:?)
 
--- *
-
 toJsonInstanceDec :: Type -> Dec -> Dec
 toJsonInstanceDec type_ toJsonFunDec =
   InstanceD Nothing [] headType [toJsonFunDec]
@@ -64,8 +62,6 @@ enumToJsonInstanceDec :: Type -> [(Text, Name)] -> Dec
 enumToJsonInstanceDec type_ members =
   toJsonInstanceDec type_ $ enumToJsonFunD members
 
--- *
-
 productToJsonFunD :: Name -> [Text] -> Dec
 productToJsonFunD conName members =
   FunD 'Ae.toJSON [clause]
@@ -73,7 +69,7 @@ productToJsonFunD conName members =
     varNamesAndJsonNames =
       mapWithAlphabeticName (,) members
     clause =
-      Clause [Compat.conp conName memberPats] body []
+      Clause [Compat.conP conName memberPats] body []
       where
         memberPats = fmap memberPat varNamesAndJsonNames
           where
@@ -94,11 +90,11 @@ sumToJsonFunD members =
         memberClause (jsonName, conName, components) =
           case components of
             0 ->
-              Clause [Compat.conp conName []] (NormalB bodyExp) []
+              Clause [Compat.conP conName []] (NormalB bodyExp) []
               where
                 bodyExp = stringJsonE jsonName
             1 ->
-              Clause [Compat.conp conName [VarP varName]] (NormalB bodyExp) []
+              Clause [Compat.conP conName [VarP varName]] (NormalB bodyExp) []
               where
                 varName = mkName "a"
                 bodyExp =
@@ -111,7 +107,7 @@ sumToJsonFunD members =
                         ]
                     )
             _ ->
-              Clause [Compat.conp conName (fmap VarP varNames)] (NormalB bodyExp) []
+              Clause [Compat.conP conName (fmap VarP varNames)] (NormalB bodyExp) []
               where
                 varNames = enumAlphabeticNames components
                 bodyExp =
@@ -131,11 +127,9 @@ enumToJsonFunD members =
     clauses = fmap memberClause members
       where
         memberClause (jsonName, conName) =
-          Clause [Compat.conp conName []] (NormalB bodyExp) []
+          Clause [Compat.conP conName []] (NormalB bodyExp) []
           where
             bodyExp = stringJsonE jsonName
-
--- *
 
 jsonArrayE :: [Exp] -> Exp
 jsonArrayE exps =
