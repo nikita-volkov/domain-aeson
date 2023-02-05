@@ -13,6 +13,8 @@ import THLego.Helpers
 import qualified THLego.Lambdas as Lambdas
 import qualified TemplateHaskell.Compat.V0208 as Compat
 
+-- * FromJSON
+
 productParseJsonD :: Name -> [(Text, Bool)] -> Dec
 productParseJsonD conName fields =
   FunD 'Ae.parseJSON [clause]
@@ -43,6 +45,8 @@ productObjectParserE objectE conName fields =
             then '(Ae..:)
             else '(Ae..:?)
 
+-- * ToJSON instance declaration
+
 toJsonInstanceDec :: Type -> Dec -> Dec
 toJsonInstanceDec type_ toJsonFunDec =
   InstanceD Nothing [] headType [toJsonFunDec]
@@ -61,6 +65,8 @@ sumToJsonInstanceDec type_ members =
 enumToJsonInstanceDec :: Type -> [(Text, Name)] -> Dec
 enumToJsonInstanceDec type_ members =
   toJsonInstanceDec type_ $ enumToJsonFunD members
+
+-- ** ToJSON Helpers
 
 productToJsonFunD :: Name -> [Text] -> Dec
 productToJsonFunD conName members =
@@ -130,6 +136,8 @@ enumToJsonFunD members =
           Clause [Compat.conP conName []] (NormalB bodyExp) []
           where
             bodyExp = stringJsonE jsonName
+
+-- * Helpers
 
 jsonArrayE :: [Exp] -> Exp
 jsonArrayE exps =
