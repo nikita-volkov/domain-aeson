@@ -1,20 +1,10 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE UndecidableInstances #-}
-
 module Main where
 
 import Domain
 import DomainAeson
+import Test.Hspec
+import qualified Test.QuickCheck.Classes as Laws
 import Prelude
-
-main :: IO ()
-main =
-  return ()
 
 declare
   Nothing
@@ -53,3 +43,13 @@ declare
         part2: Word64
 
     |]
+
+main :: IO ()
+main =
+  hspec $ do
+    lawsSpec $ Laws.jsonLaws @Word128
+
+lawsSpec :: _
+lawsSpec (Laws.Laws name properties) =
+  describe name $ for properties $ \(lawName, property) ->
+    prop lawName property
