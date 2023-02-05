@@ -15,6 +15,20 @@ import qualified TemplateHaskell.Compat.V0208 as Compat
 
 -- * FromJSON
 
+productFromJsonInstanceDec :: Type -> Name -> [(Text, Bool)] -> Dec
+productFromJsonInstanceDec type_ conName fields =
+  fromJsonInstanceDec type_ $
+    productParseJsonD conName fields
+
+-- ** FromJSON Helpers
+
+fromJsonInstanceDec :: Type -> Dec -> Dec
+fromJsonInstanceDec type_ fromJsonFunDec =
+  InstanceD Nothing [] headType [fromJsonFunDec]
+  where
+    headType =
+      AppT (ConT ''Ae.FromJSON) type_
+
 productParseJsonD :: Name -> [(Text, Bool)] -> Dec
 productParseJsonD conName fields =
   FunD 'Ae.parseJSON [clause]

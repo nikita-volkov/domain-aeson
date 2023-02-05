@@ -1,4 +1,4 @@
-module DomainAeson.InstanceDecs where
+module DomainAeson.TH where
 
 import DomainAeson.Prelude
 import qualified DomainAeson.Util.AesonTH as AesonTH
@@ -7,9 +7,9 @@ import qualified DomainCore.TH as DomainTH
 import Language.Haskell.TH.Syntax
 import THLego.Helpers
 
-toJson :: Model.TypeDec -> [Dec]
-toJson (Model.TypeDec typeName typeDef) =
-  pure $ case typeDef of
+toJsonDec :: Model.TypeDec -> Dec
+toJsonDec (Model.TypeDec typeName typeDef) =
+  case typeDef of
     Model.ProductTypeDef members ->
       AesonTH.productToJsonInstanceDec
         (ConT (textName typeName))
@@ -25,3 +25,21 @@ toJson (Model.TypeDec typeName typeDef) =
             DomainTH.sumConstructorName typeName memberName,
             length memberComponentTypes
           )
+
+fromJsonDec :: Model.TypeDec -> Dec
+fromJsonDec (Model.TypeDec typeName typeDef) =
+  case typeDef of
+    Model.ProductTypeDef members ->
+      AesonTH.productFromJsonInstanceDec
+        (ConT (textName typeName))
+        (textName typeName)
+        (fmap (second typeIsRequired) members)
+
+typeIsRequired :: Model.Type -> Bool
+typeIsRequired = \case
+  Model.AppType (Model.RefType ref :| _) ->
+    case ref of
+      -- FIXME: get a better detection of maybe
+      "Maybe" -> False
+      _ -> True
+  _ -> True

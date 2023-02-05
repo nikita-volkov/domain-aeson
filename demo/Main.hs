@@ -18,7 +18,7 @@ main =
 
 declare
   Nothing
-  toJsonDeriver
+  (toJsonDeriver <> fromJsonDeriver)
   [schema|
 
     ServiceAddress:

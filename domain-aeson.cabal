@@ -63,8 +63,8 @@ library
   default-language:   Haskell2010
   exposed-modules:    DomainAeson
   other-modules:
-    DomainAeson.InstanceDecs
     DomainAeson.Prelude
+    DomainAeson.TH
     DomainAeson.Util.AesonTH
 
   build-depends:
