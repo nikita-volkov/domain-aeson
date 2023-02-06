@@ -34,6 +34,16 @@ fromJsonDec (Model.TypeDec typeName typeDef) =
         (ConT (textName typeName))
         (textName typeName)
         (fmap (second typeIsRequired) members)
+    Model.SumTypeDef members ->
+      AesonTH.sumFromJsonInstanceDec
+        (ConT (textName typeName))
+        (fmap member members)
+      where
+        member (memberName, memberComponentTypes) =
+          ( memberName,
+            DomainTH.sumConstructorName typeName memberName,
+            length memberComponentTypes
+          )
 
 typeIsRequired :: Model.Type -> Bool
 typeIsRequired = \case

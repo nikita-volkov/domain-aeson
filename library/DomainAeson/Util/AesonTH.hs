@@ -10,6 +10,7 @@ import qualified Data.Vector as Vector
 import DomainAeson.Prelude
 import Language.Haskell.TH.Syntax
 import THLego.Helpers
+import qualified THLego.Helpers as Helpers
 import qualified THLego.Lambdas as Lambdas
 import qualified TemplateHaskell.Compat.V0208 as Compat
 
@@ -18,7 +19,55 @@ import qualified TemplateHaskell.Compat.V0208 as Compat
 productFromJsonInstanceDec :: Type -> Name -> [(Text, Bool)] -> Dec
 productFromJsonInstanceDec type_ conName fields =
   fromJsonInstanceDec type_ $
-    productParseJsonD conName fields
+    productParseJsonDec conName fields
+
+sumFromJsonInstanceDec :: Type -> [(Text, Name, Int)] -> Dec
+sumFromJsonInstanceDec type_ variants =
+  fromJsonInstanceDec type_ $
+    parseJsonDec
+  where
+    parseJsonDec =
+      FunD 'Ae.parseJSON [clause]
+      where
+        clause =
+          Clause [] (NormalB bodyExp) []
+          where
+            bodyExp =
+              Lambdas.matcher
+                [ Match
+                    (ConP 'Ae.Object [] [VarP aName])
+                    (NormalB (sumObjectParserE (VarE aName) variants))
+                    [],
+                  Match
+                    (ConP 'Ae.String [] [VarP aName])
+                    (NormalB stringBody)
+                    []
+                ]
+              where
+                stringBody =
+                  CaseE (VarE aName) matches
+                  where
+                    matches =
+                      foldr step [failure] variants
+                      where
+                        step (jsonName, conName, members) next =
+                          case members of
+                            0 ->
+                              Match
+                                (LitP (StringL (toList jsonName)))
+                                (NormalB bodyExp)
+                                []
+                                : next
+                              where
+                                bodyExp =
+                                  AppE (VarE 'pure) (ConE conName)
+                            _ -> next
+
+                        failure =
+                          Match WildP (NormalB bodyExp) []
+                          where
+                            bodyExp =
+                              AppE (VarE 'fail) (LitE (StringL "Unexpected enum value"))
 
 -- ** FromJSON Helpers
 
@@ -29,8 +78,8 @@ fromJsonInstanceDec type_ fromJsonFunDec =
     headType =
       AppT (ConT ''Ae.FromJSON) type_
 
-productParseJsonD :: Name -> [(Text, Bool)] -> Dec
-productParseJsonD conName fields =
+productParseJsonDec :: Name -> [(Text, Bool)] -> Dec
+productParseJsonDec conName fields =
   FunD 'Ae.parseJSON [clause]
   where
     clause =
@@ -45,7 +94,7 @@ productParseJsonD conName fields =
 
 productObjectParsingLamE :: Name -> [(Text, Bool)] -> Exp
 productObjectParsingLamE conName fields =
-  LamE [VarP aName] (productObjectParserE (ConE aName) conName fields)
+  LamE [VarP aName] (productObjectParserE (VarE aName) conName fields)
 
 productObjectParserE :: Exp -> Name -> [(Text, Bool)] -> Exp
 productObjectParserE objectE conName fields =
@@ -58,6 +107,41 @@ productObjectParserE objectE conName fields =
           if required
             then '(Ae..:)
             else '(Ae..:?)
+
+sumObjectParserE :: Exp -> [(Text, Name, Int)] -> Exp
+sumObjectParserE objectE variants =
+  build variants
+  where
+    build = \case
+      (jsonName, conName, components) : tail ->
+        CaseE
+          ( AppE
+              (AppE (VarE 'AeKeyMap.lookup) (textKeyE jsonName))
+              objectE
+          )
+          [ Match
+              (ConP 'Just [] [VarP (mkName "fieldValue")])
+              ( NormalB
+                  ( case components of
+                      0 ->
+                        AppE (VarE 'pure) (ConE conName)
+                      1 ->
+                        applicativeChainE
+                          (ConE conName)
+                          [AppE (VarE 'Ae.parseJSON) (VarE (mkName "fieldValue"))]
+                      _ -> error "TODO: Handle multi-arity"
+                  )
+              )
+              [],
+            Match
+              (ConP 'Nothing [] [])
+              (NormalB (build tail))
+              []
+          ]
+      _ ->
+        AppE
+          (VarE 'fail)
+          (LitE (StringL "No expected sum-type tag found"))
 
 -- * ToJSON instance declaration
 
@@ -116,7 +200,7 @@ sumToJsonFunD members =
             1 ->
               Clause [Compat.conP conName [VarP varName]] (NormalB bodyExp) []
               where
-                varName = mkName "a"
+                varName = aName
                 bodyExp =
                   AppE
                     (ConE 'Ae.Object)

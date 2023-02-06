@@ -3,12 +3,15 @@ module Main where
 import Domain
 import DomainAeson
 import Test.Hspec
-import qualified Test.QuickCheck.Classes as Laws
+import Test.Hspec.QuickCheck
+import Test.QuickCheck.Arbitrary.Generic
+import Test.QuickCheck.Classes
+import Test.QuickCheck.Instances
 import Prelude
 
 declare
   Nothing
-  (toJsonDeriver <> fromJsonDeriver)
+  (eqDeriver <> showDeriver <> genericDeriver <> toJsonDeriver <> fromJsonDeriver)
   [schema|
 
     ServiceAddress:
@@ -44,12 +47,29 @@ declare
 
     |]
 
+deriving via (GenericArbitrary ServiceAddress) instance Arbitrary ServiceAddress
+
+deriving via (GenericArbitrary NetworkAddress) instance Arbitrary NetworkAddress
+
+deriving via (GenericArbitrary TransportProtocol) instance Arbitrary TransportProtocol
+
+deriving via (GenericArbitrary Host) instance Arbitrary Host
+
+deriving via (GenericArbitrary Ip) instance Arbitrary Ip
+
+deriving via (GenericArbitrary Word128) instance Arbitrary Word128
+
 main :: IO ()
 main =
   hspec $ do
-    lawsSpec $ Laws.jsonLaws @Word128
+    lawsSpec $ jsonLaws (Proxy @ServiceAddress)
+    lawsSpec $ jsonLaws (Proxy @NetworkAddress)
+    lawsSpec $ jsonLaws (Proxy @TransportProtocol)
+    lawsSpec $ jsonLaws (Proxy @Host)
+    lawsSpec $ jsonLaws (Proxy @Ip)
+    lawsSpec $ jsonLaws (Proxy @Word128)
 
-lawsSpec :: _
-lawsSpec (Laws.Laws name properties) =
-  describe name $ for properties $ \(lawName, property) ->
+lawsSpec :: Laws -> Spec
+lawsSpec (Laws name properties) =
+  describe name $ for_ properties $ \(lawName, property) ->
     prop lawName property
