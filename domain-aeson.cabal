@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          domain-aeson
-version:       0.1.1
+version:       0.1.1.1
 synopsis:      Integration of domain with aeson
 homepage:      https://github.com/nikita-volkov/domain-aeson
 bug-reports:   https://github.com/nikita-volkov/domain-aeson/issues
@@ -70,15 +70,14 @@ library
     DomainAeson.Util.AesonTH
 
   build-depends:
-    , aeson                          >=2      && <3
-    , base                           >=4.12   && <5
-    , domain-core                    >=0.1    && <0.2
-    , template-haskell               >=2.14   && <3
-    , template-haskell-compat-v0208  >=0.1.9  && <0.2
-    , text                           >=1      && <3
-    , th-lego                        >=0.2.1  && <0.4
-    , unordered-containers           >=0.2.10 && <0.3
-    , vector                         >=0.12   && <0.13
+    , aeson >=2 && <3
+    , base >=4.15 && <5
+    , domain-core >=0.1 && <0.2
+    , template-haskell >=2.14 && <3
+    , template-haskell-compat-v0208 >=0.1.9 && <0.2
+    , text >=1 && <3
+    , th-lego >=0.2.1 && <0.4
+    , vector >=0.12 && <0.14
 
 test-suite hspec-test
   import:           base-settings
@@ -89,8 +88,8 @@ test-suite hspec-test
   build-depends:
     , domain
     , domain-aeson
-    , generic-arbitrary     >=1.0.1  && <1.1
+    , generic-arbitrary >=1.0.1 && <1.1
     , hspec
     , quickcheck-classes
-    , quickcheck-instances  >=0.3.28 && <0.4
-    , rerebase              >=1.9    && <2
+    , quickcheck-instances >=0.3.28 && <0.4
+    , rerebase >=1.9 && <2
