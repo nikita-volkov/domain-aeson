@@ -5,12 +5,10 @@ module DomainAeson.Util.AesonTH where
 import qualified Data.Aeson as Ae
 import qualified Data.Aeson.Key as AeKey
 import qualified Data.Aeson.KeyMap as AeKeyMap
-import qualified Data.Text as Text
 import qualified Data.Vector as Vector
 import DomainAeson.Prelude
 import Language.Haskell.TH.Syntax
 import THLego.Helpers
-import qualified THLego.Helpers as Helpers
 import qualified THLego.Lambdas as Lambdas
 import qualified TemplateHaskell.Compat.V0208 as Compat
 

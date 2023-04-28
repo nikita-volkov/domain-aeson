@@ -6,7 +6,7 @@ import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck.Arbitrary.Generic
 import Test.QuickCheck.Classes
-import Test.QuickCheck.Instances
+import Test.QuickCheck.Instances ()
 import Prelude
 
 declare
