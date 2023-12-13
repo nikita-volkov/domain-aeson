@@ -16,13 +16,13 @@ import qualified TemplateHaskell.Compat.V0208 as Compat
 
 productFromJsonInstanceDec :: Type -> Name -> [(Text, Bool)] -> Dec
 productFromJsonInstanceDec type_ conName fields =
-  fromJsonInstanceDec type_ $
-    productParseJsonDec conName fields
+  fromJsonInstanceDec type_
+    $ productParseJsonDec conName fields
 
 sumFromJsonInstanceDec :: Type -> [(Text, Name, Int)] -> Dec
 sumFromJsonInstanceDec type_ variants =
-  fromJsonInstanceDec type_ $
-    parseJsonDec
+  fromJsonInstanceDec type_
+    $ parseJsonDec
   where
     parseJsonDec =
       FunD 'Ae.parseJSON [clause]
