@@ -33,11 +33,11 @@ sumFromJsonInstanceDec type_ variants =
             bodyExp =
               Lambdas.matcher
                 [ Match
-                    (ConP 'Ae.Object [] [VarP aName])
+                    (Compat.conP 'Ae.Object [VarP aName])
                     (NormalB (sumObjectParserE (VarE aName) variants))
                     [],
                   Match
-                    (ConP 'Ae.String [] [VarP aName])
+                    (Compat.conP 'Ae.String [VarP aName])
                     (NormalB stringBody)
                     []
                 ]
@@ -118,7 +118,7 @@ sumObjectParserE objectE variants =
               objectE
           )
           [ Match
-              (ConP 'Just [] [VarP (mkName "fieldValue")])
+              (Compat.conP 'Just [VarP (mkName "fieldValue")])
               ( NormalB
                   ( case components of
                       0 ->
@@ -132,7 +132,7 @@ sumObjectParserE objectE variants =
               )
               [],
             Match
-              (ConP 'Nothing [] [])
+              (Compat.conP 'Nothing [])
               (NormalB (build tail))
               []
           ]
