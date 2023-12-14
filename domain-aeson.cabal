@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          domain-aeson
-version:       0.1.1.1
+version:       0.1.1.2
 synopsis:      Integration of domain with aeson
 homepage:      https://github.com/nikita-volkov/domain-aeson
 bug-reports:   https://github.com/nikita-volkov/domain-aeson/issues
@@ -71,7 +71,7 @@ library
 
   build-depends:
     , aeson >=2 && <3
-    , base >=4.15 && <5
+    , base >=4.13 && <5
     , domain-core >=0.1 && <0.2
     , template-haskell >=2.14 && <3
     , template-haskell-compat-v0208 >=0.1.9 && <0.2
