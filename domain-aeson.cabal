@@ -91,5 +91,5 @@ test-suite hspec-test
     , generic-arbitrary >=1.0.1 && <1.1
     , hspec
     , quickcheck-classes
-    , quickcheck-instances >=0.3.28 && <0.4
+    , quickcheck-instances >=0.3.28 && <0.5
     , rerebase >=1.9 && <2
