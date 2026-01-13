@@ -13,7 +13,7 @@ build-type:    Simple
 
 source-repository head
   type:     git
-  location: git://github.com/nikita-volkov/domain-aeson.git
+  location: https://github.com/nikita-volkov/domain-aeson
 
 common base-settings
   default-extensions:
